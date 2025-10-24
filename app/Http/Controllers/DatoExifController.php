@@ -14,7 +14,8 @@ class DatoExifController extends Controller
     public function index()
     {
         $exifs = DatoExif::all(); // devuelve todos los EXIF
-        return view('datoexif.index', compact('exifs'));
+        $imagenes = Imagen::where('activo', true)->get();
+        return view('datoexif.index', compact('exifs', 'imagenes'));
     }
 
     /**
@@ -61,6 +62,7 @@ class DatoExifController extends Controller
     public function update(Request $request, DatoExif $datos_exif)
     {
         $request->validate([
+            'cod_exif' => 'required|max:50|unique:datos_exif,cod_exif,' . $datos_exif->id,
             'imagen_id' => 'required|exists:imagenes,id',
             'fabricante_camara' => 'nullable|max:100',
             'modelo_camara' => 'nullable|max:100',

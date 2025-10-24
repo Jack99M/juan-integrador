@@ -15,7 +15,8 @@ class UsuarioController extends Controller
     public function index()
     {
         $usuarios = Usuario::all(); // por ahora todos, luego podemos usar ->activos()
-        return view('usuarios.index', compact('usuarios'));
+        $roles = Rol::activos()->get();
+        return view('usuarios.index', compact('usuarios', 'roles'));
     }
 
     /**

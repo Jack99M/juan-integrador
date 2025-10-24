@@ -12,7 +12,9 @@ class AnalisisController extends Controller
     public function index()
     {
         $analisis = Analisis::all();
-        return view('analisis.index', compact('analisis'));
+        $imagenes = Imagen::where('activo', true)->get();
+        $usuarios = Usuario::activos()->get();
+        return view('analisis.index', compact('analisis', 'imagenes', 'usuarios'));
     }
 
     public function create()
@@ -28,11 +30,11 @@ class AnalisisController extends Controller
             'cod_analisis' => 'required|unique:analisis,cod_analisis|max:50',
             'imagen_id' => 'required|exists:imagenes,id',
             'usuario_id' => 'nullable|exists:usuarios,id',
-            'resultado' => 'required|in:desconocido,limpia,sospechosa,manipulada',
+            'resultado' => 'required|in:autentica,manipulada,sospechosa',
             'probabilidad' => 'nullable|numeric|min:0|max:100',
             'ruta_mapa_calor' => 'nullable|string|max:255',
             'detalles' => 'nullable|json',
-            'estado' => 'required|in:en_cola,procesando,terminado,fallo',
+            'estado' => 'required|in:pendiente,procesando,completado,error',
         ]);
 
         Analisis::create($request->all());
@@ -50,14 +52,13 @@ class AnalisisController extends Controller
     public function update(Request $request, Analisis $analisis)
     {
         $request->validate([
-            'cod_analisis' => 'required|max:50|unique:analisis,cod_analisis,' . $analisis->id,
             'imagen_id' => 'required|exists:imagenes,id',
             'usuario_id' => 'nullable|exists:usuarios,id',
-            'resultado' => 'required|in:desconocido,limpia,sospechosa,manipulada',
+            'resultado' => 'required|in:autentica,manipulada,sospechosa',
             'probabilidad' => 'nullable|numeric|min:0|max:100',
             'ruta_mapa_calor' => 'nullable|string|max:255',
             'detalles' => 'nullable|json',
-            'estado' => 'required|in:en_cola,procesando,terminado,fallo',
+            'estado' => 'required|in:pendiente,procesando,completado,error',
         ]);
 
         $analisis->update($request->all());

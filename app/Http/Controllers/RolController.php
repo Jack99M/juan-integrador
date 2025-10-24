@@ -51,20 +51,20 @@ class RolController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Rol $role)
+    public function edit(Rol $rol)
     {
-        return view('roles.edit', ['rol' => $role]);
+        return view('roles.edit', compact('rol'));
     }
 
 
-    public function update(Request $request, Rol $role)
+    public function update(Request $request, Rol $rol)
     {
         $request->validate([
-            'nombre' => 'required|max:100',
+            'nombre' => 'required|max:100|unique:roles,nombre,' . $rol->id,
             'descripcion' => 'nullable|max:255',
         ]);
 
-        $role->update($request->only('nombre', 'descripcion'));
+        $rol->update($request->only('nombre', 'descripcion'));
 
         return redirect()->route('roles.index')->with('success', 'Rol actualizado correctamente.');
     }
@@ -73,16 +73,16 @@ class RolController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Rol $role)
+    public function destroy(Rol $rol)
     {
-        $role->update(['activo' => false]); 
+        $rol->update(['activo' => false]); 
 
         return redirect()->route('roles.index')->with('success', 'Rol desactivado correctamente.');
     }
 
-    public function reactivar(Rol $role)
+    public function reactivar(Rol $rol)
     {
-        $role->update(['activo' => true]);
+        $rol->update(['activo' => true]);
         return redirect()->route('roles.index')->with('success', 'Rol reactivado correctamente.');
     }
 

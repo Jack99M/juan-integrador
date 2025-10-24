@@ -15,7 +15,9 @@ class ReporteController extends Controller
     public function index()
     {
         $reportes = Reporte::all(); // Incluye activos e inactivos
-        return view('reportes.index', compact('reportes'));
+        $imagenes = Imagen::where('activo', true)->get();
+        $usuarios = Usuario::activos()->get();
+        return view('reportes.index', compact('reportes', 'imagenes', 'usuarios'));
     }
 
     /**
@@ -75,6 +77,7 @@ class ReporteController extends Controller
     public function update(Request $request, Reporte $reporte)
     {
         $request->validate([
+            'cod_reporte' => 'required|max:50|unique:reportes,cod_reporte,' . $reporte->id,
             'imagen_id' => 'required|exists:imagenes,id',
             'usuario_id' => 'nullable|exists:usuarios,id',
             'ruta_pdf' => 'nullable|file|mimes:pdf|max:10240',

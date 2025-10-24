@@ -14,7 +14,8 @@ class ImagenController extends Controller
     public function index()
     {
         $imagenes = Imagen::all();
-        return view('imagenes.index', compact('imagenes'));
+        $usuarios = Usuario::activos()->get();
+        return view('imagenes.index', compact('imagenes', 'usuarios'));
     }
 
     /**
@@ -36,7 +37,7 @@ class ImagenController extends Controller
             'cod_imagen' => 'required|unique:imagenes,cod_imagen|max:50',
             'usuario_id' => 'required|exists:usuarios,id',
             'imagen_archivo' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // 5MB
-            'estado' => 'required|in:subida,en_cola,procesando,terminado,error',
+            'estado' => 'required|in:subida,procesando,completada,error',
         ]);
 
         // Guardar archivo en storage/app/public/imagenes
@@ -82,7 +83,7 @@ class ImagenController extends Controller
             'usuario_id' => 'required|exists:usuarios,id',
             'imagen_archivo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // opcional
             'nombre_original' => 'required|max:255',
-            'estado' => 'required|in:subida,en_cola,procesando,terminado,error',
+            'estado' => 'required|in:subida,procesando,completada,error',
         ]);
 
         $data = $request->only('usuario_id', 'nombre_original', 'estado');
