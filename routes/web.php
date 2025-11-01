@@ -52,4 +52,15 @@ Route::middleware('auth')->group(function () {
     // Reportes - Todos los roles
     Route::resource('reportes', ReporteController::class);
     Route::post('reportes/{id}/reactivar', [ReporteController::class, 'reactivar'])->name('reportes.reactivar');
+    
+    // Prototipos - Todos los roles
+    Route::prefix('prototipos')->group(function () {
+        Route::get('/', function () { return view('prototipos.index'); })->name('prototipos.index');
+        Route::get('/usuarios', function () { return view('prototipos.usuarios'); })->name('prototipos.usuarios');
+        Route::get('/roles', function () { return view('prototipos.roles'); })->name('prototipos.roles');
+        Route::get('/imagenes', function () { return view('prototipos.imagenes'); })->name('prototipos.imagenes');
+        Route::get('/analisis', function () { return view('prototipos.analisis'); })->name('prototipos.analisis');
+        Route::get('/reportes', function () { return view('prototipos.reportes'); })->name('prototipos.reportes');
+        Route::get('/datos-exif', function () { return view('prototipos.datos-exif'); })->name('prototipos.datos-exif');
+    });
 });

@@ -234,4 +234,68 @@
         </div>
     </div>
 </div>
+
+<!-- Sección de Prototipos -->
+<div class="row">
+    <div class="col-12">
+        <div class="card card-info">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-palette"></i> Prototipos Visuales</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Explora los prototipos visuales de cada módulo del sistema</p>
+                <div class="row">
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <a href="{{ route('prototipos.index') }}" class="btn btn-app bg-primary" style="width: 100%; height: 80px;">
+                            <i class="fas fa-th-large"></i> Prototipos
+                        </a>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <a href="{{ route('prototipos.usuarios') }}" class="btn btn-app bg-success" style="width: 100%; height: 80px;">
+                            <i class="fas fa-users"></i> Usuarios
+                        </a>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <a href="{{ route('prototipos.roles') }}" class="btn btn-app bg-warning" style="width: 100%; height: 80px;">
+                            <i class="fas fa-user-shield"></i> Roles
+                        </a>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <a href="{{ route('prototipos.imagenes') }}" class="btn btn-app bg-info" style="width: 100%; height: 80px;">
+                            <i class="fas fa-images"></i> Imágenes
+                        </a>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <a href="{{ route('prototipos.analisis') }}" class="btn btn-app bg-secondary" style="width: 100%; height: 80px;">
+                            <i class="fas fa-search-plus"></i> Análisis
+                        </a>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <a href="{{ route('prototipos.reportes') }}" class="btn btn-app bg-danger" style="width: 100%; height: 80px;">
+                            <i class="fas fa-file-alt"></i> Reportes
+                        </a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <a href="{{ route('prototipos.datos-exif') }}" class="btn btn-app bg-dark" style="width: 100%; height: 80px;">
+                            <i class="fas fa-camera"></i> Datos EXIF
+                        </a>
+                    </div>
+                    <div class="col-md-10 col-sm-8">
+                        <div class="alert alert-info mb-0">
+                            <h6><i class="fas fa-info-circle"></i> Información</h6>
+                            <p class="mb-0">Los prototipos son vistas estéticas no funcionales para visualizar el diseño de cada módulo CRUD del sistema.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
