@@ -30,11 +30,11 @@ class AnalisisController extends Controller
             'cod_analisis' => 'required|unique:analisis,cod_analisis|max:50',
             'imagen_id' => 'required|exists:imagenes,id',
             'usuario_id' => 'nullable|exists:usuarios,id',
-            'resultado' => 'required|in:autentica,manipulada,sospechosa',
+            'resultado' => 'required|in:desconocido,limpia,sospechosa,manipulada',
             'probabilidad' => 'nullable|numeric|min:0|max:100',
             'ruta_mapa_calor' => 'nullable|string|max:255',
             'detalles' => 'nullable|json',
-            'estado' => 'required|in:pendiente,procesando,completado,error',
+            'estado' => 'required|in:en_cola,procesando,terminado,fallo',
         ]);
 
         Analisis::create($request->all());
@@ -54,11 +54,11 @@ class AnalisisController extends Controller
         $request->validate([
             'imagen_id' => 'required|exists:imagenes,id',
             'usuario_id' => 'nullable|exists:usuarios,id',
-            'resultado' => 'required|in:autentica,manipulada,sospechosa',
+            'resultado' => 'required|in:desconocido,limpia,sospechosa,manipulada',
             'probabilidad' => 'nullable|numeric|min:0|max:100',
             'ruta_mapa_calor' => 'nullable|string|max:255',
             'detalles' => 'nullable|json',
-            'estado' => 'required|in:pendiente,procesando,completado,error',
+            'estado' => 'required|in:en_cola,procesando,terminado,fallo',
         ]);
 
         $analisis->update($request->all());

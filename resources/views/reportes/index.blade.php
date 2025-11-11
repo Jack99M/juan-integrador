@@ -24,11 +24,12 @@
             <table class="table table-bordered table-striped table-hover">
                 <thead class="thead-dark">
                     <tr>
-                        <th style="width: 25%;"><i class="fas fa-code"></i> Código Reporte</th>
-                        <th style="width: 25%;"><i class="fas fa-image"></i> Imagen</th>
-                        <th style="width: 25%;"><i class="fas fa-user"></i> Usuario</th>
+                        <th style="width: 20%;"><i class="fas fa-code"></i> Código Reporte</th>
+                        <th style="width: 20%;"><i class="fas fa-image"></i> Imagen</th>
+                        <th style="width: 20%;"><i class="fas fa-user"></i> Usuario</th>
+                        <th style="width: 10%;"><i class="fas fa-file-pdf"></i> PDF</th>
                         <th style="width: 15%;"><i class="fas fa-circle"></i> Estado</th>
-                        <th style="width: 10%;"><i class="fas fa-cogs"></i> Acciones</th>
+                        <th style="width: 15%;"><i class="fas fa-cogs"></i> Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -37,6 +38,15 @@
                             <td><code>{{ $reporte->cod_reporte }}</code></td>
                             <td>{{ $reporte->imagen->cod_imagen ?? '-' }}</td>
                             <td>{{ $reporte->usuario->nombre ?? '-' }}</td>
+                            <td>
+                                @if($reporte->ruta_pdf)
+                                    <a href="{{ asset('storage/' . $reporte->ruta_pdf) }}" target="_blank" class="btn btn-danger btn-xs">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                @else
+                                    <span class="text-muted">Sin PDF</span>
+                                @endif
+                            </td>
                             <td>
                                 @if($reporte->activo)
                                     <span class="badge badge-success"><i class="fas fa-check"></i> Activo</span>
@@ -52,13 +62,10 @@
                                     </button>
 
                                     @if($reporte->activo)
-                                        <form action="{{ route('reportes.destroy', $reporte) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" title="Desactivar" onclick="return confirm('¿Está seguro de desactivar este reporte?')">
-                                                <i class="fas fa-ban"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-danger btn-sm" title="Desactivar" 
+                                                onclick="confirmDeactivate({{ $reporte->id }}, '{{ $reporte->cod_reporte }}', 'reportes')">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
                                     @else
                                         <form action="{{ route('reportes.reactivar', $reporte->id) }}" method="POST" class="d-inline">
                                             @csrf
@@ -184,6 +191,38 @@
     </div>
 </div>
 
+<!-- Modal Desactivar -->
+<div class="modal fade" id="deactivateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: var(--danger-gradient); color: white;">
+                <h4 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Confirmar Desactivación</h4>
+                <button type="button" class="close" data-dismiss="modal" style="color: white;">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-ban fa-3x text-danger mb-3"></i>
+                <h5>¿Está seguro de desactivar este registro?</h5>
+                <p class="text-muted mb-0" id="deactivateItemName"></p>
+                <small class="text-warning">Esta acción se puede revertir posteriormente</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <form id="deactivateForm" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-ban"></i> Desactivar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function editReporte(id, codigo, imagenId, usuarioId) {
     document.getElementById('editForm').action = '/reportes/' + id;
@@ -191,6 +230,12 @@ function editReporte(id, codigo, imagenId, usuarioId) {
     document.getElementById('edit_imagen_id').value = imagenId;
     document.getElementById('edit_usuario_id').value = usuarioId || '';
     $('#editModal').modal('show');
+}
+
+function confirmDeactivate(id, name, module) {
+    document.getElementById('deactivateForm').action = '/' + module + '/' + id;
+    document.getElementById('deactivateItemName').textContent = name;
+    $('#deactivateModal').modal('show');
 }
 </script>
 @endsection

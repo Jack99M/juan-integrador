@@ -40,7 +40,7 @@ class UsuarioController extends Controller
             'apellido_paterno' => 'required|max:100',
             'apellido_materno' => 'nullable|max:100',
             'email' => 'required|email|unique:usuarios,email|max:150',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|min:8|regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/|confirmed',
             'organizacion' => 'nullable|max:150',
         ]);
 
@@ -79,7 +79,7 @@ class UsuarioController extends Controller
             'apellido_paterno' => 'required|max:100',
             'apellido_materno' => 'nullable|max:100',
             'email' => 'required|email|max:150|unique:usuarios,email,' . $usuario->id,
-            'password' => 'nullable|min:6|confirmed',
+            'password' => 'nullable|min:8|regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/|confirmed',
             'organizacion' => 'nullable|max:150',
         ]);
 

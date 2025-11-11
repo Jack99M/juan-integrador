@@ -73,13 +73,10 @@
                                     </button>
 
                                     @if($imagen->activo)
-                                        <form action="{{ route('imagenes.destroy', $imagen->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" title="Desactivar" onclick="return confirm('¿Está seguro de desactivar esta imagen?')">
-                                                <i class="fas fa-ban"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-danger btn-sm" title="Desactivar" 
+                                                onclick="confirmDeactivate({{ $imagen->id }}, '{{ $imagen->nombre_original }}', 'imagenes')">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
                                     @else
                                         <form action="{{ route('imagenes.reactivar', $imagen->id) }}" method="POST" class="d-inline">
                                             @csrf
@@ -142,8 +139,9 @@
                                 <label>Estado</label>
                                 <select name="estado" class="form-control" required>
                                     <option value="subida">Subida</option>
+                                    <option value="en_cola">En Cola</option>
                                     <option value="procesando">Procesando</option>
-                                    <option value="completada">Completada</option>
+                                    <option value="terminado">Terminado</option>
                                     <option value="error">Error</option>
                                 </select>
                             </div>
@@ -207,8 +205,9 @@
                                 <label>Estado</label>
                                 <select name="estado" id="edit_estado" class="form-control" required>
                                     <option value="subida">Subida</option>
+                                    <option value="en_cola">En Cola</option>
                                     <option value="procesando">Procesando</option>
-                                    <option value="completada">Completada</option>
+                                    <option value="terminado">Terminado</option>
                                     <option value="error">Error</option>
                                 </select>
                             </div>
@@ -233,6 +232,38 @@
     </div>
 </div>
 
+<!-- Modal Desactivar -->
+<div class="modal fade" id="deactivateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: var(--danger-gradient); color: white;">
+                <h4 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Confirmar Desactivación</h4>
+                <button type="button" class="close" data-dismiss="modal" style="color: white;">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-ban fa-3x text-danger mb-3"></i>
+                <h5>¿Está seguro de desactivar este registro?</h5>
+                <p class="text-muted mb-0" id="deactivateItemName"></p>
+                <small class="text-warning">Esta acción se puede revertir posteriormente</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <form id="deactivateForm" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-ban"></i> Desactivar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function editImagen(id, codigo, usuarioId, nombreOriginal, estado) {
     document.getElementById('editForm').action = '/imagenes/' + id;
@@ -241,6 +272,12 @@ function editImagen(id, codigo, usuarioId, nombreOriginal, estado) {
     document.getElementById('edit_nombre_original').value = nombreOriginal;
     document.getElementById('edit_estado').value = estado;
     $('#editModal').modal('show');
+}
+
+function confirmDeactivate(id, name, module) {
+    document.getElementById('deactivateForm').action = '/' + module + '/' + id;
+    document.getElementById('deactivateItemName').textContent = name;
+    $('#deactivateModal').modal('show');
 }
 </script>
 @endsection
