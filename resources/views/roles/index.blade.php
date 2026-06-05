@@ -21,7 +21,7 @@
             @endif
 
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-hover">
+                <table id="rolesTable" class="table table-bordered table-striped table-hover">
                     <thead class="thead-dark">
                         <tr>
                             <th style="width: 15%;"><i class="fas fa-code"></i> Código</th>
@@ -200,5 +200,39 @@ function confirmDeactivate(id, name, module) {
     document.getElementById('deactivateItemName').textContent = name;
     $('#deactivateModal').modal('show');
 }
+</script>
+@endsection
+
+@section('scripts')
+<script>
+$(document).ready(function() {
+    $('#rolesTable').DataTable({
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>><"row"<"col-sm-12 col-md-6"B>><"row"<"col-sm-12"tr>><"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        buttons: [
+            { extend: 'copy', text: 'Copiar', className: 'btn btn-secondary btn-sm' },
+            { extend: 'csv', text: 'CSV', className: 'btn btn-success btn-sm' },
+            { extend: 'excel', text: 'Excel', className: 'btn btn-success btn-sm' },
+            { extend: 'pdf', text: 'PDF', className: 'btn btn-danger btn-sm' },
+            { extend: 'print', text: 'Imprimir', className: 'btn btn-info btn-sm' }
+        ],
+        language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: "Siguiente",
+                previous: "Anterior"
+            },
+            zeroRecords: "No se encontraron registros",
+            emptyTable: "No hay datos disponibles"
+        },
+        pageLength: 10,
+        order: [[0, 'asc']]
+    });
+});
 </script>
 @endsection

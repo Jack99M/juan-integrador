@@ -28,7 +28,7 @@ class Imagen extends Model
 
     public function datosExif()
     {
-        return $this->hasMany(DatosExif::class, 'imagen_id');
+        return $this->hasMany(DatoExif::class, 'imagen_id');
     }
 
     public function analisis()

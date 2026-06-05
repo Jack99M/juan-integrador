@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Rol;
 use Illuminate\Http\Request;
+use App\Helpers\AuditHelper;
 
 class RolController extends Controller
 {
@@ -35,7 +36,9 @@ class RolController extends Controller
             'descripcion' => 'nullable|max:255',
         ]);
 
-        Rol::create($request->all());
+        $rol = Rol::create($request->all());
+
+        AuditHelper::log('crear', 'roles', 'Rol creado: ' . $rol->nombre);
 
         return redirect()->route('roles.index')->with('success', 'Rol creado correctamente.');
     }
@@ -66,6 +69,8 @@ class RolController extends Controller
 
         $rol->update($request->only('nombre', 'descripcion'));
 
+        AuditHelper::log('editar', 'roles', 'Rol editado: ' . $rol->nombre);
+
         return redirect()->route('roles.index')->with('success', 'Rol actualizado correctamente.');
     }
 
@@ -75,7 +80,10 @@ class RolController extends Controller
      */
     public function destroy(Rol $rol)
     {
+        $nombre = $rol->nombre;
         $rol->update(['activo' => false]); 
+
+        AuditHelper::log('eliminar', 'roles', 'Rol desactivado: ' . $nombre);
 
         return redirect()->route('roles.index')->with('success', 'Rol desactivado correctamente.');
     }

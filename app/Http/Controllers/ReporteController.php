@@ -6,6 +6,9 @@ use App\Models\Reporte;
 use App\Models\Imagen;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
+use App\Helpers\AuditHelper;
+use App\Services\HeatmapService;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReporteController extends Controller
 {
@@ -14,10 +17,23 @@ class ReporteController extends Controller
      */
     public function index()
     {
-        $reportes = Reporte::all(); // Incluye activos e inactivos
+        // Si es reportero, solo ve reportes de sus imágenes
+        if (auth()->user()->rol->nombre == 'Reportero') {
+            $reportes = Reporte::whereHas('imagen', function($query) {
+                $query->where('usuario_id', auth()->id());
+            })->get();
+        } else {
+            $reportes = Reporte::all();
+        }
         $imagenes = Imagen::where('activo', true)->get();
         $usuarios = Usuario::activos()->get();
-        return view('reportes.index', compact('reportes', 'imagenes', 'usuarios'));
+        
+        // Generar siguiente código
+        $ultimoCodigo = Reporte::latest('id')->first();
+        $siguienteNumero = $ultimoCodigo ? intval(substr($ultimoCodigo->cod_reporte, 4)) + 1 : 1;
+        $siguienteCodigo = 'REP-' . str_pad($siguienteNumero, 3, '0', STR_PAD_LEFT);
+        
+        return view('reportes.index', compact('reportes', 'imagenes', 'usuarios', 'siguienteCodigo'));
     }
 
     /**
@@ -35,6 +51,13 @@ class ReporteController extends Controller
      */
     public function store(Request $request)
     {
+        // Auto-generar código si no se proporciona
+        if (!$request->cod_reporte) {
+            $ultimoCodigo = Reporte::latest('id')->first();
+            $siguienteNumero = $ultimoCodigo ? intval(substr($ultimoCodigo->cod_reporte, 4)) + 1 : 1;
+            $request->merge(['cod_reporte' => 'REP-' . str_pad($siguienteNumero, 3, '0', STR_PAD_LEFT)]);
+        }
+        
         $request->validate([
             'cod_reporte' => 'required|unique:reportes,cod_reporte|max:50',
             'imagen_id' => 'required|exists:imagenes,id',
@@ -49,7 +72,7 @@ class ReporteController extends Controller
             $rutaPdf = $archivo->store('reportes', 'public');
         }
 
-        Reporte::create([
+        $reporte = Reporte::create([
             'cod_reporte' => $request->cod_reporte,
             'imagen_id' => $request->imagen_id,
             'usuario_id' => $request->usuario_id,
@@ -57,6 +80,8 @@ class ReporteController extends Controller
             'reporte_json' => $request->reporte_json,
             'activo' => true,
         ]);
+
+        AuditHelper::log('crear', 'reportes', 'Reporte creado: ' . $reporte->cod_reporte);
 
         return redirect()->route('reportes.index')->with('success', 'Reporte creado correctamente.');
     }
@@ -93,12 +118,16 @@ class ReporteController extends Controller
 
         $reporte->update($data);
 
+        AuditHelper::log('editar', 'reportes', 'Reporte editado: ' . $reporte->cod_reporte);
+
         return redirect()->route('reportes.index')->with('success', 'Reporte actualizado correctamente.');
     }
 
     public function destroy(Reporte $reporte)
     {
+        $codigo = $reporte->cod_reporte;
         $reporte->update(['activo' => false]);
+        AuditHelper::log('eliminar', 'reportes', 'Reporte desactivado: ' . $codigo);
         return redirect()->route('reportes.index')->with('success', 'Reporte desactivado correctamente.');
     }
 
@@ -107,5 +136,31 @@ class ReporteController extends Controller
         $reporte = Reporte::findOrFail($id);
         $reporte->update(['activo' => true]);
         return redirect()->route('reportes.index')->with('success', 'Reporte reactivado correctamente.');
+    }
+
+    public function generarPdf($id)
+    {
+        $reporte = Reporte::with('imagen.datosExif', 'usuario')->findOrFail($id);
+        $heatmapService = new HeatmapService();
+        
+        $imagenPath = storage_path('app/public/' . $reporte->imagen->ruta_almacenamiento);
+        $heatmapPath = storage_path('app/public/heatmaps/heatmap_' . $reporte->id . '.jpg');
+        
+        if (!file_exists(storage_path('app/public/heatmaps'))) {
+            mkdir(storage_path('app/public/heatmaps'), 0755, true);
+        }
+        
+        $heatmapService->generateHeatmap($imagenPath, $heatmapPath);
+        
+        $datosExif = $reporte->imagen->datosExif->first();
+        
+        $pdf = Pdf::loadView('reportes.pdf', [
+            'reporte' => $reporte,
+            'heatmapPath' => $heatmapPath,
+            'imagenOriginalPath' => $imagenPath,
+            'datosExif' => $datosExif
+        ]);
+        
+        return $pdf->download('reporte_' . $reporte->cod_reporte . '.pdf');
     }
 }

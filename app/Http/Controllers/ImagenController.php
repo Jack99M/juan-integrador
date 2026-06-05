@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Imagen;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
+use App\Helpers\AuditHelper;
 
 class ImagenController extends Controller
 {
@@ -13,9 +14,20 @@ class ImagenController extends Controller
      */
     public function index()
     {
-        $imagenes = Imagen::all();
+        // Si es reportero, solo ve sus imágenes
+        if (auth()->user()->rol->nombre == 'Reportero') {
+            $imagenes = Imagen::where('usuario_id', auth()->id())->get();
+        } else {
+            $imagenes = Imagen::all();
+        }
         $usuarios = Usuario::activos()->get();
-        return view('imagenes.index', compact('imagenes', 'usuarios'));
+        
+        // Generar siguiente código
+        $ultimoCodigo = Imagen::latest('id')->first();
+        $siguienteNumero = $ultimoCodigo ? intval(substr($ultimoCodigo->cod_imagen, 4)) + 1 : 1;
+        $siguienteCodigo = 'IMG-' . str_pad($siguienteNumero, 3, '0', STR_PAD_LEFT);
+        
+        return view('imagenes.index', compact('imagenes', 'usuarios', 'siguienteCodigo'));
     }
 
     /**
@@ -32,6 +44,13 @@ class ImagenController extends Controller
      */
     public function store(Request $request)
     {
+        // Auto-generar código si no se proporciona
+        if (!$request->cod_imagen) {
+            $ultimoCodigo = Imagen::latest('id')->first();
+            $siguienteNumero = $ultimoCodigo ? intval(substr($ultimoCodigo->cod_imagen, 4)) + 1 : 1;
+            $request->merge(['cod_imagen' => 'IMG-' . str_pad($siguienteNumero, 3, '0', STR_PAD_LEFT)]);
+        }
+        
         // Validación
         $request->validate([
             'cod_imagen' => 'required|unique:imagenes,cod_imagen|max:50',
@@ -50,7 +69,7 @@ class ImagenController extends Controller
         }
 
         // Crear registro en BD
-        Imagen::create([
+        $imagen = Imagen::create([
             'cod_imagen' => $request->cod_imagen,
             'usuario_id' => $request->usuario_id,
             'nombre_original' => $nombreOriginal ?? null,
@@ -60,6 +79,8 @@ class ImagenController extends Controller
             'estado' => $request->estado,
             'activo' => true,
         ]);
+
+        AuditHelper::log('crear', 'imagenes', 'Imagen creada: ' . $imagen->nombre_original);
 
         return redirect()->route('imagenes.index')->with('success', 'Imagen creada correctamente.');
     }
@@ -100,6 +121,8 @@ class ImagenController extends Controller
 
         $imagen->update($data);
 
+        AuditHelper::log('editar', 'imagenes', 'Imagen editada: ' . $imagen->nombre_original);
+
         return redirect()->route('imagenes.index')->with('success', 'Imagen actualizada correctamente.');
     }
 
@@ -108,7 +131,9 @@ class ImagenController extends Controller
      */
     public function destroy(Imagen $imagen)
     {
+        $nombre = $imagen->nombre_original;
         $imagen->update(['activo' => false]);
+        AuditHelper::log('eliminar', 'imagenes', 'Imagen desactivada: ' . $nombre);
         return redirect()->route('imagenes.index')->with('success', 'Imagen desactivada correctamente.');
     }
 
