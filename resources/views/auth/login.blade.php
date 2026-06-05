@@ -11,11 +11,12 @@
     
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --dark-gradient: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%);
         }
         
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--dark-gradient);
             min-height: 100vh;
         }
         
@@ -54,8 +55,29 @@
         }
         
         .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: #2c3e50;
+            box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+        }
+        
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="file"]:focus {
+            border-color: #2c3e50;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
         }
         
         .input-group-text {

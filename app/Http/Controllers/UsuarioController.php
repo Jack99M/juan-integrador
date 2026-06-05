@@ -6,6 +6,7 @@ use App\Models\Usuario;
 use App\Models\Rol;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Helpers\AuditHelper;
 
 class UsuarioController extends Controller
 {
@@ -14,9 +15,15 @@ class UsuarioController extends Controller
      */
     public function index()
     {
-        $usuarios = Usuario::all(); // por ahora todos, luego podemos usar ->activos()
+        $usuarios = Usuario::all();
         $roles = Rol::activos()->get();
-        return view('usuarios.index', compact('usuarios', 'roles'));
+        
+        // Generar siguiente código
+        $ultimoCodigo = Usuario::latest('id')->first();
+        $siguienteNumero = $ultimoCodigo ? intval(substr($ultimoCodigo->cod_usuario, 4)) + 1 : 1;
+        $siguienteCodigo = 'USR-' . str_pad($siguienteNumero, 3, '0', STR_PAD_LEFT);
+        
+        return view('usuarios.index', compact('usuarios', 'roles', 'siguienteCodigo'));
     }
 
     /**
@@ -33,6 +40,13 @@ class UsuarioController extends Controller
      */
     public function store(Request $request)
     {
+        // Auto-generar código si no se proporciona
+        if (!$request->cod_usuario) {
+            $ultimoCodigo = Usuario::latest('id')->first();
+            $siguienteNumero = $ultimoCodigo ? intval(substr($ultimoCodigo->cod_usuario, 4)) + 1 : 1;
+            $request->merge(['cod_usuario' => 'USR-' . str_pad($siguienteNumero, 3, '0', STR_PAD_LEFT)]);
+        }
+        
         $request->validate([
             'cod_usuario' => 'required|unique:usuarios,cod_usuario|max:50',
             'rol_id' => 'nullable|exists:roles,id',
@@ -44,7 +58,7 @@ class UsuarioController extends Controller
             'organizacion' => 'nullable|max:150',
         ]);
 
-        Usuario::create([
+        $usuario = Usuario::create([
             'cod_usuario' => $request->cod_usuario,
             'rol_id' => $request->rol_id,
             'nombre' => $request->nombre,
@@ -55,6 +69,8 @@ class UsuarioController extends Controller
             'organizacion' => $request->organizacion,
             'activo' => true,
         ]);
+
+        AuditHelper::log('crear', 'usuarios', 'Usuario creado: ' . $usuario->nombre . ' ' . $usuario->apellido_paterno);
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente.');
     }
@@ -91,6 +107,8 @@ class UsuarioController extends Controller
 
         $usuario->update($data);
 
+        AuditHelper::log('editar', 'usuarios', 'Usuario editado: ' . $usuario->nombre . ' ' . $usuario->apellido_paterno);
+
         return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
@@ -99,7 +117,9 @@ class UsuarioController extends Controller
      */
     public function destroy(Usuario $usuario)
     {
+        $nombre = $usuario->nombre . ' ' . $usuario->apellido_paterno;
         $usuario->update(['activo' => false]);
+        AuditHelper::log('eliminar', 'usuarios', 'Usuario desactivado: ' . $nombre);
         return redirect()->route('usuarios.index')->with('success', 'Usuario desactivado correctamente.');
     }
 

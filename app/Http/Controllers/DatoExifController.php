@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DatoExif;
 use App\Models\Imagen;
 use Illuminate\Http\Request;
+use App\Helpers\AuditHelper;
 
 class DatoExifController extends Controller
 {
@@ -13,9 +14,15 @@ class DatoExifController extends Controller
      */
     public function index()
     {
-        $exifs = DatoExif::all(); // devuelve todos los EXIF
+        $exifs = DatoExif::all();
         $imagenes = Imagen::where('activo', true)->get();
-        return view('datoexif.index', compact('exifs', 'imagenes'));
+        
+        // Generar siguiente código
+        $ultimoCodigo = DatoExif::latest('id')->first();
+        $siguienteNumero = $ultimoCodigo ? intval(substr($ultimoCodigo->cod_exif, 5)) + 1 : 1;
+        $siguienteCodigo = 'EXIF-' . str_pad($siguienteNumero, 3, '0', STR_PAD_LEFT);
+        
+        return view('datoexif.index', compact('exifs', 'imagenes', 'siguienteCodigo'));
     }
 
     /**
@@ -32,6 +39,13 @@ class DatoExifController extends Controller
      */
     public function store(Request $request)
     {
+        // Auto-generar código si no se proporciona
+        if (!$request->cod_exif) {
+            $ultimoCodigo = DatoExif::latest('id')->first();
+            $siguienteNumero = $ultimoCodigo ? intval(substr($ultimoCodigo->cod_exif, 5)) + 1 : 1;
+            $request->merge(['cod_exif' => 'EXIF-' . str_pad($siguienteNumero, 3, '0', STR_PAD_LEFT)]);
+        }
+        
         $request->validate([
             'cod_exif' => 'required|unique:datos_exif,cod_exif|max:50',
             'imagen_id' => 'required|exists:imagenes,id',
@@ -42,7 +56,9 @@ class DatoExifController extends Controller
             'datos_crudos' => 'nullable|json',
         ]);
 
-        DatoExif::create($request->all());
+        $exif = DatoExif::create($request->all());
+
+        AuditHelper::log('crear', 'datos_exif', 'Datos EXIF creados: ' . $exif->cod_exif);
 
         return redirect()->route('datos_exif.index')->with('success', 'Datos EXIF creados correctamente.');
     }
@@ -72,6 +88,8 @@ class DatoExifController extends Controller
         ]);
 
         $datos_exif->update($request->all());
+
+        AuditHelper::log('editar', 'datos_exif', 'Datos EXIF editados: ' . $datos_exif->cod_exif);
 
         return redirect()->route('datos_exif.index')->with('success', 'Datos EXIF actualizados correctamente.');
     }

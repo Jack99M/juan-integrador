@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('cod_analisis')->unique();
             $table->unsignedBigInteger('imagen_id');
             $table->unsignedBigInteger('usuario_id')->nullable();
-            $table->enum('resultado',['desconocido','limpia','sospechosa','manipulada'])->default('desconocido');
+            $table->enum('resultado',['desconocido','limpia','sospechosa','manipulada'])->nullable()->default('desconocido');
             $table->decimal('probabilidad', 5, 2)->nullable(); // 0.00 - 100.00 %
             $table->string('ruta_mapa_calor', 255)->nullable();
             $table->json('detalles')->nullable();

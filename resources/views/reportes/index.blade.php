@@ -21,7 +21,7 @@
         @endif
 
         <div class="table-responsive">
-            <table class="table table-bordered table-striped table-hover">
+            <table id="reportesTable" class="table table-bordered table-striped table-hover">
                 <thead class="thead-dark">
                     <tr>
                         <th style="width: 20%;"><i class="fas fa-code"></i> Código Reporte</th>
@@ -39,13 +39,9 @@
                             <td>{{ $reporte->imagen->cod_imagen ?? '-' }}</td>
                             <td>{{ $reporte->usuario->nombre ?? '-' }}</td>
                             <td>
-                                @if($reporte->ruta_pdf)
-                                    <a href="{{ asset('storage/' . $reporte->ruta_pdf) }}" target="_blank" class="btn btn-danger btn-xs">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </a>
-                                @else
-                                    <span class="text-muted">Sin PDF</span>
-                                @endif
+                                <a href="{{ route('reportes.pdf', $reporte->id) }}" class="btn btn-danger btn-xs" title="Generar PDF con Mapa de Calor" target="_blank">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
                             </td>
                             <td>
                                 @if($reporte->activo)
@@ -99,7 +95,8 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Código Reporte</label>
-                        <input type="text" name="cod_reporte" class="form-control" required>
+                        <input type="text" name="cod_reporte" class="form-control" value="{{ $siguienteCodigo }}" readonly>
+                        <small class="text-muted">Código generado automáticamente</small>
                     </div>
                     <div class="form-group">
                         <label>Imagen</label>
@@ -121,7 +118,7 @@
                     </div>
                     <div class="form-group">
                         <label>Archivo PDF</label>
-                        <input type="file" name="ruta_pdf" class="form-control-file" accept=".pdf">
+                        <input type="file" name="ruta_pdf" class="form-control" accept=".pdf">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -174,7 +171,7 @@
                     </div>
                     <div class="form-group">
                         <label>Nuevo Archivo PDF (opcional)</label>
-                        <input type="file" name="ruta_pdf" class="form-control-file" accept=".pdf">
+                        <input type="file" name="ruta_pdf" class="form-control" accept=".pdf">
                         <small class="text-muted">Dejar vacío para mantener el archivo actual</small>
                     </div>
                 </div>
@@ -237,5 +234,44 @@ function confirmDeactivate(id, name, module) {
     document.getElementById('deactivateItemName').textContent = name;
     $('#deactivateModal').modal('show');
 }
+</script>
+@endsection
+
+@section('scripts')
+<script>
+$(document).ready(function() {
+    $('#reportesTable').DataTable({
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>><"row"<"col-sm-12 col-md-6"B>><"row"<"col-sm-12"tr>><"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        buttons: [
+            { extend: 'copy', text: 'Copiar', className: 'btn btn-secondary btn-sm' },
+            { extend: 'csv', text: 'CSV', className: 'btn btn-success btn-sm' },
+            { extend: 'excel', text: 'Excel', className: 'btn btn-success btn-sm' },
+            { extend: 'pdf', text: 'PDF', className: 'btn btn-danger btn-sm' },
+            { extend: 'print', text: 'Imprimir', className: 'btn btn-info btn-sm' }
+        ],
+        language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: "Siguiente",
+                previous: "Anterior"
+            },
+            zeroRecords: "No se encontraron registros",
+            emptyTable: "No hay datos disponibles"
+        },
+        pageLength: 10,
+        order: [[0, 'asc']]
+    });
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('create') === '1') {
+        $('#createModal').modal('show');
+    }
+});
 </script>
 @endsection

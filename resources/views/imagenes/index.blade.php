@@ -20,8 +20,34 @@
             </div>
         @endif
 
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label>Filtrar por Estado:</label>
+                <select id="filtroEstadoImg" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="Subida">Subida</option>
+                    <option value="En_cola">En Cola</option>
+                    <option value="Procesando">Procesando</option>
+                    <option value="Terminado">Terminado</option>
+                    <option value="Error">Error</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label>Filtrar por Fecha:</label>
+                <input type="text" id="filtroFecha" class="form-control" placeholder="Seleccionar rango">
+            </div>
+            <div class="col-md-4">
+                <label>Filtrar por Activo:</label>
+                <select id="filtroActivo" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="Activo">Activo</option>
+                    <option value="Inactivo">Inactivo</option>
+                </select>
+            </div>
+        </div>
+
         <div class="table-responsive">
-            <table class="table table-bordered table-striped table-hover">
+            <table id="imagenesTable" class="table table-bordered table-striped table-hover">
                 <thead class="thead-dark">
                     <tr>
                         <th style="width: 12%;"><i class="fas fa-code"></i> Código</th>
@@ -112,7 +138,8 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Código Imagen</label>
-                                <input type="text" name="cod_imagen" class="form-control" required>
+                                <input type="text" name="cod_imagen" class="form-control" value="{{ $siguienteCodigo }}" readonly>
+                                <small class="text-muted">Código generado automáticamente</small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -131,7 +158,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Archivo de Imagen</label>
-                                <input type="file" name="imagen_archivo" class="form-control-file" accept="image/*" required>
+                                <input type="file" name="imagen_archivo" class="form-control" accept="image/*" required>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -215,7 +242,7 @@
                     </div>
                     <div class="form-group">
                         <label>Nuevo Archivo (opcional)</label>
-                        <input type="file" name="imagen_archivo" class="form-control-file" accept="image/*">
+                        <input type="file" name="imagen_archivo" class="form-control" accept="image/*">
                         <small class="text-muted">Dejar vacío para mantener el archivo actual</small>
                     </div>
                 </div>
@@ -279,5 +306,83 @@ function confirmDeactivate(id, name, module) {
     document.getElementById('deactivateItemName').textContent = name;
     $('#deactivateModal').modal('show');
 }
+</script>
+@endsection
+
+@section('scripts')
+<script>
+$(document).ready(function() {
+    var table = $('#imagenesTable').DataTable({
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>><"row"<"col-sm-12 col-md-6"B>><"row"<"col-sm-12"tr>><"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        buttons: [
+            { extend: 'copy', text: 'Copiar', className: 'btn btn-secondary btn-sm' },
+            { extend: 'csv', text: 'CSV', className: 'btn btn-success btn-sm' },
+            { extend: 'excel', text: 'Excel', className: 'btn btn-success btn-sm' },
+            { extend: 'pdf', text: 'PDF', className: 'btn btn-danger btn-sm' },
+            { extend: 'print', text: 'Imprimir', className: 'btn btn-info btn-sm' }
+        ],
+        language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: "Siguiente",
+                previous: "Anterior"
+            },
+            zeroRecords: "No se encontraron registros",
+            emptyTable: "No hay datos disponibles"
+        },
+        pageLength: 10,
+        order: [[0, 'asc']]
+    });
+
+    $('#filtroEstadoImg').on('change', function() {
+        table.column(3).search(this.value).draw();
+    });
+
+    $('#filtroActivo').on('change', function() {
+        table.column(6).search(this.value).draw();
+    });
+
+    $('#filtroFecha').daterangepicker({
+        autoUpdateInput: false,
+        locale: {
+            cancelLabel: 'Limpiar',
+            applyLabel: 'Aplicar',
+            format: 'DD/MM/YYYY'
+        }
+    });
+
+    $('#filtroFecha').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+        $.fn.dataTable.ext.search.push(
+            function(settings, data, dataIndex) {
+                var min = picker.startDate.format('DD/MM/YYYY');
+                var max = picker.endDate.format('DD/MM/YYYY');
+                var date = data[4].split('<br>')[0].replace('<i class="fas fa-calendar"></i> ', '').trim();
+                if ((min === "" && max === "") || (date >= min && date <= max)) {
+                    return true;
+                }
+                return false;
+            }
+        );
+        table.draw();
+    });
+
+    $('#filtroFecha').on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
+        $.fn.dataTable.ext.search.pop();
+        table.draw();
+    });
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('create') === '1') {
+        $('#createModal').modal('show');
+    }
+});
 </script>
 @endsection

@@ -1,0 +1,21 @@
+{
+  "proyecto": "Sistema de Verificación de Imágenes CNN — UNIFRANZ La Paz",
+  "prototipo": "1 (Exploratorio)",
+  "arquitectura": "EfficientNet-B0 + Transfer Learning",
+  "dataset": "CASIA v2",
+  "img_size": 224,
+  "umbral_decision": 0.5,
+  "bloques_congelados": "0-5",
+  "bloques_finetune": "6-7",
+  "epocas_fase1": 10,
+  "epocas_fase2": 15,
+  "lr_fase1": 0.001,
+  "lr_fase2": 1e-05,
+  "casos_uso": "Diario La Razón — Bolivia",
+  "manipulaciones": [
+    "copy-move",
+    "splicing"
+  ],
+  "fecha_entrenamiento": "2026-05-15T22:14:27.599748",
+  "last_conv_layer": "top_conv"
+}

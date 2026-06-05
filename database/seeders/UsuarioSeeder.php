@@ -82,7 +82,7 @@ class UsuarioSeeder extends Seeder
                 'apellido_materno' => 'Nina',
                 'email' => 'luis.catari@gmail.com',
                 'password' => Hash::make('Luis123'),
-                'organizacion' => 'Periodismo Digital',
+                'organizacion' => 'Análisis Forense',
                 'activo' => true,
             ],
             [
@@ -93,7 +93,7 @@ class UsuarioSeeder extends Seeder
                 'apellido_materno' => 'Apaza',
                 'email' => 'gaby.quispe@gmail.com',
                 'password' => Hash::make('Gaby123'),
-                'organizacion' => 'Periodismo Digital',
+                'organizacion' => 'Análisis Forense',
                 'activo' => true,
             ],
             [
@@ -104,7 +104,7 @@ class UsuarioSeeder extends Seeder
                 'apellido_materno' => 'Nina',
                 'email' => 'valeria.apaza@gmail.com',
                 'password' => Hash::make('Valeria123'),
-                'organizacion' => 'Periodismo Digital',
+                'organizacion' => 'Análisis Forense',
                 'activo' => true,
             ],
             [
@@ -115,7 +115,7 @@ class UsuarioSeeder extends Seeder
                 'apellido_materno' => 'Callisaya',
                 'email' => 'cristian.huanca@gmail.com',
                 'password' => Hash::make('Cristian123'),
-                'organizacion' => 'Periodismo Digital',
+                'organizacion' => 'Análisis Forense',
                 'activo' => true,
             ],
             // Analistas
@@ -127,7 +127,7 @@ class UsuarioSeeder extends Seeder
                 'apellido_materno' => 'Choque',
                 'email' => 'rodrigo.ticona@gmail.com',
                 'password' => Hash::make('Rodrigo123'),
-                'organizacion' => 'Análisis Forense',
+                'organizacion' => 'Periodismo Digital',
                 'activo' => true,
             ],
             [
@@ -138,7 +138,7 @@ class UsuarioSeeder extends Seeder
                 'apellido_materno' => 'Copa',
                 'email' => 'daniela.mamani@gmail.com',
                 'password' => Hash::make('Daniela123'),
-                'organizacion' => 'Análisis Forense',
+                'organizacion' => 'Periodismo Digital',
                 'activo' => true,
             ],
         ];

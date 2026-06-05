@@ -10,6 +10,8 @@ use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\DatoExifController;
 use App\Http\Controllers\AnalisisController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\BackupController;
 
 // Rutas de autenticación
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -18,8 +20,25 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Rutas protegidas
 Route::middleware('auth')->group(function () {
-    // Dashboard - Todos los roles
-    Route::get('/', [DashboardController::class, 'index']);
+    // Dashboard principal - redirige según rol
+    Route::get('/', function() {
+        $rol = auth()->user()->rol->nombre;
+        switch($rol) {
+            case 'Administrador':
+                return redirect('/dashboard/administrador');
+            case 'Reportero':
+                return redirect('/dashboard/reportero');
+            case 'Analista':
+                return redirect('/dashboard/analista');
+            default:
+                return app(App\Http\Controllers\DashboardController::class)->index();
+        }
+    })->name('dashboard');
+    
+    // Dashboards específicos por rol
+    Route::get('/dashboard/administrador', [DashboardController::class, 'administrador'])->middleware('role:Administrador');
+    Route::get('/dashboard/reportero', [DashboardController::class, 'reportero'])->middleware('role:Reportero');
+    Route::get('/dashboard/analista', [DashboardController::class, 'analista'])->middleware('role:Analista');
     
     // Perfil - Todos los usuarios
     Route::get('/perfil', [PerfilController::class, 'show'])->name('perfil.show');
@@ -33,18 +52,27 @@ Route::middleware('auth')->group(function () {
         
         Route::resource('usuarios', UsuarioController::class)->except(['show']);
         Route::post('usuarios/{id}/reactivar', [UsuarioController::class, 'reactivar'])->name('usuarios.reactivar');
+        
+        Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit_logs.index');
+        
+        Route::get('backups', [BackupController::class, 'index'])->name('backups.index');
+        Route::post('backups/create', [BackupController::class, 'create'])->name('backups.create');
+        Route::get('backups/{filename}', [BackupController::class, 'download'])->name('backups.download');
     });
     
-    // Gestión de Imágenes - Admin y Analista
-    Route::middleware('role:Administrador,Analista')->group(function () {
+    // Imágenes - Admin y Reportero
+    Route::middleware('role:Administrador,Reportero')->group(function () {
         Route::resource('imagenes', ImagenController::class)->parameters(['imagenes' => 'imagen']);
         Route::post('imagenes/{id}/reactivar', [ImagenController::class, 'reactivar'])->name('imagenes.reactivar');
-        
+    });
+    
+    // Datos EXIF - Admin y Analista
+    Route::middleware('role:Administrador,Analista')->group(function () {
         Route::resource('datos_exif', DatoExifController::class);
     });
     
-    // Análisis - Admin, Analista y Investigador
-    Route::middleware('role:Administrador,Analista,Investigador')->group(function () {
+    // Análisis - Admin y Analista
+    Route::middleware('role:Administrador,Analista')->group(function () {
         Route::resource('analisis', AnalisisController::class)->parameters(['analisis' => 'analisis']);
         Route::post('analisis/{id}/reactivar', [AnalisisController::class, 'reactivar'])->name('analisis.reactivar');
     });
@@ -52,6 +80,7 @@ Route::middleware('auth')->group(function () {
     // Reportes - Todos los roles
     Route::resource('reportes', ReporteController::class);
     Route::post('reportes/{id}/reactivar', [ReporteController::class, 'reactivar'])->name('reportes.reactivar');
+    Route::get('reportes/{id}/pdf', [ReporteController::class, 'generarPdf'])->name('reportes.pdf');
     
     // Prototipos - Todos los roles
     Route::prefix('prototipos')->group(function () {
