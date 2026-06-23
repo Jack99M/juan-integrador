@@ -31,10 +31,6 @@
                             <i class="fas fa-download"></i> Crear Backup Manual
                         </button>
                     </form>
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-info-circle"></i> 
-                        Los backups se crean automáticamente cada 2 semanas. Se mantienen solo las 3 copias más recientes.
-                    </div>
                 </div>
 
                 <div class="table-responsive">

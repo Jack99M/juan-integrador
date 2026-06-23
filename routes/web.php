@@ -4,12 +4,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\RolController; // <- esto faltaba
+use App\Http\Controllers\RolController; 
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\DatoExifController;
 use App\Http\Controllers\AnalisisController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\ReporteEstadisticoController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\BackupController;
 
@@ -81,6 +82,18 @@ Route::middleware('auth')->group(function () {
     Route::resource('reportes', ReporteController::class);
     Route::post('reportes/{id}/reactivar', [ReporteController::class, 'reactivar'])->name('reportes.reactivar');
     Route::get('reportes/{id}/pdf', [ReporteController::class, 'generarPdf'])->name('reportes.pdf');
+    
+    // Reportes Estadísticos - Todos los roles
+    Route::prefix('reportes/estadisticos')->group(function () {
+        Route::get('/', [ReporteEstadisticoController::class, 'index'])->name('reportes.estadisticos.index');
+        Route::get('/estado-analisis', [ReporteEstadisticoController::class, 'porEstadoAnalisis'])->name('reportes.estadisticos.estado-analisis');
+        Route::get('/formato', [ReporteEstadisticoController::class, 'porFormato'])->name('reportes.estadisticos.formato');
+        Route::get('/estado-subida', [ReporteEstadisticoController::class, 'porEstadoSubida'])->name('reportes.estadisticos.estado-subida');
+        Route::get('/ultimo-mes', [ReporteEstadisticoController::class, 'ultimoMes'])->name('reportes.estadisticos.ultimo-mes');
+        Route::get('/ultimo-anio', [ReporteEstadisticoController::class, 'ultimoAnio'])->name('reportes.estadisticos.ultimo-anio');
+        Route::get('/periodo', [ReporteEstadisticoController::class, 'porPeriodo'])->name('reportes.estadisticos.periodo');
+        Route::get('/general', [ReporteEstadisticoController::class, 'general'])->name('reportes.estadisticos.general');
+    });
     
     // Prototipos - Todos los roles
     Route::prefix('prototipos')->group(function () {

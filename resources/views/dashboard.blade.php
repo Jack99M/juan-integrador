@@ -291,5 +291,38 @@
     </div>
 </div>
 
+<!-- Modal para Periodo Personalizado en Dashboard -->
+<div class="modal fade" id="modalPeriodoDashboard" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('reportes.estadisticos.periodo') }}" method="GET" target="_blank">
+                <div class="modal-header" style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); color: white;">
+                    <h5 class="modal-title"><i class="fas fa-calendar-week"></i> Seleccionar Periodo</h5>
+                    <button type="button" class="close" data-dismiss="modal" style="color: white;">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> Fecha Inicio</label>
+                        <input type="date" name="fecha_inicio" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> Fecha Fin</label>
+                        <input type="date" name="fecha_fin" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn" style="background: #6f42c1; color: white;">
+                        <i class="fas fa-file-pdf"></i> Generar Reporte
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @endsection
